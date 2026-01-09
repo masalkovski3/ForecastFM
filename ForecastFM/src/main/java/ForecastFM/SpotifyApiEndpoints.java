@@ -22,7 +22,7 @@ public class SpotifyApiEndpoints {
         this.httpClient = HttpClient.newHttpClient();
     }
 
-    public String authenticate() throws IOException, InterruptedException {
+    public String getAccessToken() throws IOException, InterruptedException {
         String a = clientId + ":" + clientSecret;
         String encodedA = Base64.getEncoder().encodeToString(a.getBytes(StandardCharsets.UTF_8));
 
@@ -42,5 +42,75 @@ public class SpotifyApiEndpoints {
         } else {
             throw new RuntimeException("Spotify API returned HTTP status code " + response.statusCode());
         }
+    }
+
+    /**
+     * Hämtar och returnerar alla genrer i API-et
+     * @return lista med genrer.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public String getGenres() throws IOException, InterruptedException {
+        String token = getAccessToken();
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.spotify.com/v1/recommendations/available-genre-seeds"))
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        return response.body();
+    }
+
+    /**
+     * Hämtar en artist baserat på namn.
+     * @param name
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public String getArtists(String name) throws IOException, InterruptedException {
+        String token = getAccessToken();
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.spotify.com/v1/search?q=" + name + "&type=artist&limit=10"))
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        return response.body();
+    }
+
+    /**
+     * Hämtar recommendationer baserat på tempo och valence.
+     * @param tempo
+     * @param valence
+     * @param limit
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public String getRecommendations(double tempo, double valence, double danceability, int limit) throws IOException, InterruptedException {
+        String token = getAccessToken();
+
+        String url = String.format(
+                "https://api.spotify.com/v1/recommendations?seed_genres=%s&target_energy=%s&target_valence=%s&limit=%d",
+                tempo,
+                valence,
+                danceability,
+                limit
+        );
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        return response.body();
     }
 }
