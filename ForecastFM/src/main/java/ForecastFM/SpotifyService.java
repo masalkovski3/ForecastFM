@@ -8,6 +8,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.net.URI;
+import java.util.List;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -94,12 +96,11 @@ public class SpotifyService {
      * @throws IOException
      * @throws InterruptedException
      */
-    public String getRecommendations(String genre, double tempo, double valence, double danceability, int limit) throws IOException, InterruptedException {
+    public String getRecommendations(double tempo, double valence, double danceability, int limit) throws IOException, InterruptedException {
         String token = getAccessToken();
 
         String url = String.format(
                 "https://api.spotify.com/v1/recommendations?seed_genres=%s&target_energy=%s&target_valence=%s&target_danceability=%s&limit=%d",
-                URLEncoder.encode(genre, StandardCharsets.UTF_8),
                 tempo,
                 valence,
                 danceability,
@@ -114,5 +115,10 @@ public class SpotifyService {
 
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
         return response.body();
+    }
+
+    public SearchResult searchTracks(MoodProfile mood, int limit) throws IOException, InterruptedException {
+        String response = getRecommendations(mood.getTempo(), mood.getValence(), mood.getDanceability(), limit);
+        return new SearchResult(response);
     }
 }
