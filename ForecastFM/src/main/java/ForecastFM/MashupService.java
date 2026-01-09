@@ -2,6 +2,8 @@ package ForecastFM;
 
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 @Service
 public class MashupService {
         private WeatherService weatherService;
@@ -15,7 +17,7 @@ public class MashupService {
             this.moodMapper = moodMapper;
         }
 
-        public MashupResponse createMashup(double lat, double lon, int limit, String units){
+        public MashupResponse createMashup(double lat, double lon, int limit, String units) throws IOException, InterruptedException {
             WeatherDto weather = weatherService.getWeather(lat, lon, units);
             WeatherSnapshot snapshot = new WeatherSnapshot(weather.getWeatherId());
             MoodProfile mood = moodMapper.fromWeather(snapshot);
