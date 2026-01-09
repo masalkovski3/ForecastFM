@@ -12,43 +12,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class WeatherService{
         // API-nyckel på klassnivå
-    private static final String WEATHER_API_KEY = System.getenv("OPENWEATHER_API_KEY");
-    private static final HttpClient client = HttpClient.newHttpClient();
-    private static final ObjectMapper mapper = new ObjectMapper();
-        public static void main(String[]args) throws Exception {
-
-        // Hårdkodad lat/lon (exempel Malmö)
-        double lat = 55.6059;
-        double lon = 13.0007;
-
-        // Reverse geocoding för att få stad
-        String city = getCityFromLatLon(lat, lon);
-        System.out.println("Upptäckt stad: " + city);
-
-        // Hämta väderdata med funktion
-        JsonNode weatherData = getWeather(lat, lon);
-
-        if (weatherData != null) {
-            // Temperatur
-            int temp = (int) weatherData.get("main").get("temp").asDouble();
-            System.out.println("Temperatur: " + temp + "°C");
-
-            // Väderbeskrivning
-            String weather = weatherData.get("weather").get(0).get("description").asText();
-            System.out.println("Väder: " + weather);
-
-            // Vind
-            int wind = (int) weatherData.get("wind").get("speed").asDouble();
-            System.out.println("Vind: " + wind + " m/sekund");
-
-            // Ikon
-            String icon = weatherData.get("weather").get(0).get("icon").asText();
-            System.out.println("Ikon: " + icon);
-        }
-    }
-
+    private final String WEATHER_API_KEY = System.getenv("OPENWEATHER_API_KEY");
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+    
     // Funktion för reverse geocoding: lat/lon → stad
-    public static String getCityFromLatLon(double lat, double lon) throws Exception {
+    public String getCityFromLatLon(double lat, double lon) throws Exception {
         String reverseUrl = "https://api.openweathermap.org/geo/1.0/reverse"
                 + "?lat=" + lat
                 + "&lon=" + lon
@@ -70,7 +39,7 @@ public class WeatherService{
     }
 
     // Ny funktion: Hämta väderdata för lat/lon
-    public static JsonNode getWeather(double lat, double lon) throws Exception {
+    public JsonNode getWeather(double lat, double lon) throws Exception {
         String weatherUrl = "https://api.openweathermap.org/data/2.5/weather"
                 + "?lat=" + lat
                 + "&lon=" + lon
@@ -90,4 +59,41 @@ public class WeatherService{
 
         return mapper.readTree(response.body());
     }
+
+    public WeatherDto getWeatherDto(double lat, double lon) throws Exception {
+    // Hämta väderdata som JsonNode
+    JsonNode data = getWeather(lat, lon);
+
+    if (data == null) {
+        return null; // eller kasta exception beroende på hur du vill hantera fel
+    }
+
+    // Extrahera relevant info
+    int weatherId = data.get("weather").get(0).get("id").asInt();
+    String main = data.get("weather").get(0).get("main").asText();
+    String description = data.get("weather").get(0).get("description").asText();
+    double temperature = data.get("main").get("temp").asDouble();
+
+    // Returnera ett WeatherDto-objekt
+    return new WeatherDto(weatherId, main, description, temperature);
+    }
+
+    public WeatherDto getWeatherForMashup(double lat, double lon) throws Exception {
+        // Hämta JsonNode
+        JsonNode data = getWeather(lat, lon);
+        if (data == null) {
+            return null;
+        }
+
+        // Mappa till WeatherDto
+        int weatherId = data.get("weather").get(0).get("id").asInt();
+        String main = data.get("weather").get(0).get("main").asText();
+        String description = data.get("weather").get(0).get("description").asText();
+        double temperature = data.get("main").get("temp").asDouble();
+
+        return new WeatherDto(weatherId, main, description, temperature);
+    }
 }
+
+
+
