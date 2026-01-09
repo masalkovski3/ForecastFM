@@ -21,6 +21,6 @@ public class MashupService {
             MoodProfile mood = moodMapper.fromWeather(snapshot);
             SearchResult tracks = spotifyService.searchTracks(mood, limit);
 
-            return MashupResponse.from(weather, mood, tracks, limit, units, lat, lon);
+            return MashupResponse.from(weather, mood, tracks, limit);
         }
 }
