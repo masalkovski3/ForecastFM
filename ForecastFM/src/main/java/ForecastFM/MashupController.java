@@ -20,9 +20,8 @@ public class MashupController {
     public MashupResponse getWeatherMusic(
             @RequestParam double lat,
             @RequestParam double lon,
-            @RequestParam(defaultValue = "10") int limit,
-            @RequestParam(defaultValue = "metric") String units){
+            @RequestParam(defaultValue = "10") int limit) throws Exception {
 
-        return mashupService.createMashup(lat, lon, limit, units);
+        return mashupService.createMashup(lat, lon, limit);
     }
 }
