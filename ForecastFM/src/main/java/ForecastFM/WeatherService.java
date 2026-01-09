@@ -1,4 +1,4 @@
-package com.forecastfm;
+package ForecastFM;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -9,7 +9,9 @@ import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.stereotype.Service;
 
+@Service
 public class WeatherService{
         public static void main(String[]args) throws Exception {
 
