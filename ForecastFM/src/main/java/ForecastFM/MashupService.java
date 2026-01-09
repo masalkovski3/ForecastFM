@@ -15,8 +15,8 @@ public class MashupService {
             this.moodMapper = moodMapper;
         }
 
-        public MashupResponse createMashup(double lat, double lon, int limit, String units){
-            WeatherDto weather = weatherService.getWeather(lat, lon, units);
+        public MashupResponse createMashup(double lat, double lon, int limit) throws Exception {
+            WeatherDto weather = weatherService.getWeather(lat, lon);
             WeatherSnapshot snapshot = new WeatherSnapshot(weather.getWeatherId());
             MoodProfile mood = moodMapper.fromWeather(snapshot);
             SearchResult tracks = spotifyService.searchTracks(mood, limit);
