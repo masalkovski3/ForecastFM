@@ -1,6 +1,7 @@
 package ForecastFM;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -8,19 +9,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.net.URI;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+@Service
 public class SpotifyService {
+    @Value("${SPOTIFY_CLIENT_ID}")
     private String clientId;
+
+    @Value("${SPOTIFY_CLIENT_SECRET}")
     private String clientSecret;
-    private HttpClient httpClient;
+    private HttpClient httpClient = HttpClient.newHttpClient();
     private String accessToken;
     private JSONObject json;
-
-    public SpotifyService(String clientId, String clientSecret) {
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-        this.httpClient = HttpClient.newHttpClient();
-    }
 
     public String getAccessToken() throws IOException, InterruptedException {
         String a = clientId + ":" + clientSecret;
@@ -93,11 +94,12 @@ public class SpotifyService {
      * @throws IOException
      * @throws InterruptedException
      */
-    public String getRecommendations(double tempo, double valence, double danceability, int limit) throws IOException, InterruptedException {
+    public String getRecommendations(String genre, double tempo, double valence, double danceability, int limit) throws IOException, InterruptedException {
         String token = getAccessToken();
 
         String url = String.format(
-                "https://api.spotify.com/v1/recommendations?seed_genres=%s&target_energy=%s&target_valence=%s&limit=%d",
+                "https://api.spotify.com/v1/recommendations?seed_genres=%s&target_energy=%s&target_valence=%s&target_danceability=%s&limit=%d",
+                URLEncoder.encode(genre, StandardCharsets.UTF_8),
                 tempo,
                 valence,
                 danceability,
