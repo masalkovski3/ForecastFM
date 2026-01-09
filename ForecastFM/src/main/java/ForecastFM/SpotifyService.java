@@ -9,14 +9,14 @@ import java.util.Base64;
 import java.net.URI;
 import org.json.JSONObject;
 
-public class SpotifyApiEndpoints {
+public class SpotifyService {
     private String clientId;
     private String clientSecret;
     private HttpClient httpClient;
     private String accessToken;
     private JSONObject json;
 
-    public SpotifyApiEndpoints(String clientId, String clientSecret) {
+    public SpotifyService(String clientId, String clientSecret) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.httpClient = HttpClient.newHttpClient();
