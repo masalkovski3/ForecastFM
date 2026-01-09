@@ -3,71 +3,92 @@ package ForecastFM;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
 import java.net.URI;
-import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.stereotype.Service;
 
+
 @Service
 public class WeatherService{
+        // API-nyckel på klassnivå
+    private static final String WEATHER_API_KEY = System.getenv("OPENWEATHER_API_KEY");
+    private static final HttpClient client = HttpClient.newHttpClient();
+    private static final ObjectMapper mapper = new ObjectMapper();
         public static void main(String[]args) throws Exception {
 
-        String WEATHER_API_KEY = System.getenv("OPENWEATHER_API_KEY"); // Hämtar API nyckeln från env filen
-        
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Stad: ");
-        String city = scanner.nextLine().trim();
-        city = city.replace(" ", "%20");
-        scanner.close();
+        // Hårdkodad lat/lon (exempel Malmö)
+        double lat = 55.6059;
+        double lon = 13.0007;
 
-        String baseUrl = "https://api.openweathermap.org/data/2.5/weather?q=";
-        String units = "&units=metric";
-        String apiParameters = "&appid=" + WEATHER_API_KEY; 
-        String url = baseUrl + city + apiParameters + units;
-        System.out.println(url);
+        // Reverse geocoding för att få stad
+        String city = getCityFromLatLon(lat, lon);
+        System.out.println("Upptäckt stad: " + city);
 
-        HttpClient client = HttpClient.newHttpClient(); // Skapar en HTTP klient
+        // Hämta väderdata med funktion
+        JsonNode weatherData = getWeather(lat, lon);
 
-        HttpRequest request = HttpRequest.newBuilder() //Skapar en request = API anropet
-            .uri(URI.create(url))
-            .build();
+        if (weatherData != null) {
+            // Temperatur
+            int temp = (int) weatherData.get("main").get("temp").asDouble();
+            System.out.println("Temperatur: " + temp + "°C");
 
-        HttpResponse<String> response = 
-            client.send(request, HttpResponse.BodyHandlers.ofString()); //här skickas requesten till Openweather 
+            // Väderbeskrivning
+            String weather = weatherData.get("weather").get(0).get("description").asText();
+            System.out.println("Väder: " + weather);
 
-        System.out.println("Statuskod: " + response.statusCode());
-        
-        String json = response.body(); //sparar svaret från anropet här
-        System.out.println("Response: "+ json);
+            // Vind
+            int wind = (int) weatherData.get("wind").get("speed").asDouble();
+            System.out.println("Vind: " + wind + " m/sekund");
 
-        ObjectMapper mapper = new ObjectMapper(); //Lägger till objectmapper som kan översätta jsondatan
-        JsonNode root = mapper.readTree(json); //Bygger ett lättläsligt träd av datan 
-        System.out.println(root); //root är alltså den fina nya json strukturen
+            // Ikon
+            String icon = weatherData.get("weather").get(0).get("icon").asText();
+            System.out.println("Ikon: " + icon);
+        }
+    }
 
-        JsonNode mainNode = root.get("main"); //plocka ut det som ligger i main i trädet
-        System.out.println(mainNode);
+    // Funktion för reverse geocoding: lat/lon → stad
+    public static String getCityFromLatLon(double lat, double lon) throws Exception {
+        String reverseUrl = "https://api.openweathermap.org/geo/1.0/reverse"
+                + "?lat=" + lat
+                + "&lon=" + lon
+                + "&limit=1"
+                + "&appid=" + WEATHER_API_KEY;
 
-        //För att plocka ut temperaturen:
-        int temp = (int) mainNode.get("temp").asDouble();
-        System.out.println("Temperatur: " + temp + "°C");
+        HttpRequest geoRequest = HttpRequest.newBuilder()
+                .uri(URI.create(reverseUrl))
+                .build();
 
-        //För att plocka ut vädertyp:
-        String weather = root.get("weather").get(0).get("description").asText(); //ändra från description till main om vi inte vill ha detaljerad info
-        System.out.println("Väder: " + weather);
+        HttpResponse<String> geoResponse = client.send(geoRequest, HttpResponse.BodyHandlers.ofString());
+        JsonNode geoRoot = mapper.readTree(geoResponse.body());
 
-        //För att plocka ut vind:
-        int wind = (int) root.get("wind").get("speed").asDouble();
-        System.out.println("Vind: " + wind + " m/sekund");
+        if (geoRoot.isEmpty()) {
+            return "Okänd plats";
+        }
 
-        //För att plocka ut ikonen:
-        String icon = root.get("weather").get(0).get("icon").asText();
-        System.out.println("Ikon" + icon);
+        return geoRoot.get(0).get("name").asText();
+    }
 
+    // Ny funktion: Hämta väderdata för lat/lon
+    public static JsonNode getWeather(double lat, double lon) throws Exception {
+        String weatherUrl = "https://api.openweathermap.org/data/2.5/weather"
+                + "?lat=" + lat
+                + "&lon=" + lon
+                + "&appid=" + WEATHER_API_KEY
+                + "&units=metric";
 
+        HttpRequest weatherRequest = HttpRequest.newBuilder()
+                .uri(URI.create(weatherUrl))
+                .build();
+
+        HttpResponse<String> response = client.send(weatherRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            System.out.println("Fel vid hämtning av väder: " + response.statusCode());
+            return null;
+        }
+
+        return mapper.readTree(response.body());
     }
 }
-
-

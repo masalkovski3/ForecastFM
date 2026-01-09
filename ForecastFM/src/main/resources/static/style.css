@@ -5,8 +5,12 @@ header{
     color: #d4e3f3;
     font-size: 20px;
 }
+
+header h1{
+    font-size: 50px;
+}
 body{
-    background: #d4e3f3;
+    background-image: url("/static/bakgrund-1.jpg"); 
     display: flex;
     flex-direction: column;
 }
