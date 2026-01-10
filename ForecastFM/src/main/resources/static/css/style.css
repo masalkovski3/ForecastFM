@@ -109,3 +109,19 @@ main button:hover{
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-weight: 600;
 }
+
+.summary, .tracks {
+    max-width: 700px;
+    margin: 24px auto;
+    padding: 16px;
+}
+
+.track-list {
+    list-style: none;
+    padding: 0;
+}
+
+.track-item {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}

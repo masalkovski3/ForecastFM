@@ -19,9 +19,115 @@
 
     <main>
         <button id="btnGenerate">Generate from my location</button>
-        <pre id="output"></pre>
+
+        <div id="status"></div>
+        <div id="result"></div>
     </main>
     <script>
+        const btn = document.getElementById("btnGenerate");
+        const statusEl = document.getElementById("status");
+        const resultEl = document.getElementById("result");
+
+        btn.addEventListener("click", async () => {
+            statusEl.textContent = "Working…";
+            resultEl.innerHTML = "";
+
+            try {
+                //Hämtar geolocation genom webben, ist för genom java
+                const pos = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                });
+
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+
+                //kallar på backenden för att fixa mashupsen
+                const res = await fetch(`/api/v1/mashups/weather-music?lat=${lat}&lon=${lon}`);
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(`Backend error ${res.status}: ${text}`);
+                }
+
+                const data = await res.json();
+
+                //renderar summeringen av datan, vädret tracks m.m.
+                const weather = data.weather || {};
+                const mood = data.mood || {};
+                statusEl.textContent = "";
+
+                resultEl.appendChild(renderSummary(weather, mood));
+                resultEl.appendChild(renderTracks(data.tracks || []));
+
+            } catch (err) {
+                statusEl.textContent = `Request failed: ${err.message}`;
+            }
+        });
+
+        function renderSummary(weather, mood) {
+            const div = document.createElement("div");
+            div.className = "summary";
+
+            const temp = weather.temperature != null ? `${weather.temperature.toFixed(1)}°C` : "—";
+            const desc = weather.description || weather.main || "—";
+            const moodId = mood.id || "—";
+
+            div.innerHTML = `
+    <h2>Result</h2>
+    <p><strong>Weather:</strong> ${desc} (${temp})</p>
+    <p><strong>Mood:</strong> ${moodId}</p>
+  `;
+            return div;
+        }
+
+        function renderTracks(tracks) {
+            const section = document.createElement("section");
+            section.className = "tracks";
+
+            const title = document.createElement("h3");
+            title.textContent = "Recommended tracks";
+            section.appendChild(title);
+
+            if (tracks.length === 0) {
+                const p = document.createElement("p");
+                p.textContent = "No tracks returned.";
+                section.appendChild(p);
+                return section;
+            }
+
+            const ul = document.createElement("ul");
+            ul.className = "track-list";
+
+            tracks.forEach(t => {
+                const li = document.createElement("li");
+                li.className = "track-item";
+
+                const name = t.name || "Unknown track";
+                const artist = t.artist || "Unknown artist";
+                const url = t.url || "#";
+                const preview = t.previewUrl;
+
+                li.innerHTML = `
+      <a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(name)}</a>
+      <span> – ${escapeHtml(artist)}</span>
+      ${preview ? ` | <a href="${preview}" target="_blank" rel="noopener noreferrer">Preview</a>` : ""}
+    `;
+                ul.appendChild(li);
+            });
+
+            section.appendChild(ul);
+            return section;
+        }
+
+        //XSS-skydd
+        function escapeHtml(str) {
+            return String(str)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+        /*
         const output = document.getElementById("output");
         const btn = document.getElementById("btnGenerate");
 
@@ -70,6 +176,7 @@
                 }
             );
         });
+         */
     </script>
 
 
