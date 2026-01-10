@@ -11,16 +11,12 @@ import java.net.URI;
 import java.util.List;
 
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SpotifyService {
-    @Value("${SPOTIFY_CLIENT_ID}")
-    private String clientId;
-
-    @Value("${SPOTIFY_CLIENT_SECRET}")
-    private String clientSecret;
+    private final String clientId = System.getenv("SPOTIFY_CLIENT_ID");
+    private final String clientSecret = System.getenv("SPOTIFY_CLIENT_SECRET");
     private HttpClient httpClient = HttpClient.newHttpClient();
     private String accessToken;
     private JSONObject json;
@@ -43,6 +39,8 @@ public class SpotifyService {
             this.accessToken = json.getString("access_token");
             return json.getString("access_token");
         } else {
+            System.out.println("Spotify token status: " + response.statusCode());
+            System.out.println("Spotify token body: " + response.body());
             throw new RuntimeException("Spotify API returned HTTP status code " + response.statusCode());
         }
     }
@@ -89,6 +87,8 @@ public class SpotifyService {
 
     /**
      * Hämtar recommendationer baserat på tempo och valence.
+     *
+     * @param seedGenres
      * @param tempo
      * @param valence
      * @param limit
@@ -96,11 +96,14 @@ public class SpotifyService {
      * @throws IOException
      * @throws InterruptedException
      */
-    public String getRecommendations(double tempo, double valence, double danceability, int limit) throws IOException, InterruptedException {
+    public String getRecommendations(List<String> seedGenres, double tempo, double valence, double danceability, int limit) throws IOException, InterruptedException {
         String token = getAccessToken();
+
+        String seedGenresParam = URLEncoder.encode(String.join(",", seedGenres), StandardCharsets.UTF_8);
 
         String url = String.format(
                 "https://api.spotify.com/v1/recommendations?seed_genres=%s&target_energy=%s&target_valence=%s&target_danceability=%s&limit=%d",
+                seedGenresParam,
                 tempo,
                 valence,
                 danceability,
@@ -109,7 +112,7 @@ public class SpotifyService {
 
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", "Bearer " + token)
                 .GET()
                 .build();
 
@@ -118,7 +121,7 @@ public class SpotifyService {
     }
 
     public SearchResult searchTracks(MoodProfile mood, int limit) throws IOException, InterruptedException {
-        String response = getRecommendations(mood.getTempo(), mood.getValence(), mood.getDanceability(), limit);
+        String response = getRecommendations(mood.getSeedGenres(), mood.getTempo(), mood.getValence(), mood.getDanceability(), limit);
         return new SearchResult(response);
     }
 }

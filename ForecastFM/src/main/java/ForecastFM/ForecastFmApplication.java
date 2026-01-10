@@ -8,6 +8,7 @@ public class ForecastFmApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ForecastFmApplication.class, args);
+
 	}
 
 }

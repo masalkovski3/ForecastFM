@@ -18,8 +18,60 @@
     </nav>
 
     <main>
-        <h1>Generate music</h1>
+        <button id="btnGenerate">Generate from my location</button>
+        <pre id="output"></pre>
     </main>
+    <script>
+        const output = document.getElementById("output");
+        const btn = document.getElementById("btnGenerate");
+
+        function log(msg) {
+            output.textContent = msg;
+        }
+
+        btn.addEventListener("click", () => {
+            log("Fetching location...");
+
+            if (!navigator.geolocation) {
+                log("Geolocation is not supported by this browser.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+
+                    log(`Got coordinates:\nlat=${lat}\nlon=${lon}\nCalling backend...`);
+
+                    try {
+                        // Din endpoint i MashupController
+                        const url = `/api/v1/mashups/weather-music?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=10`;
+
+                        const res = await fetch(url);
+                        if (!res.ok) {
+                            const text = await res.text();
+                            throw new Error(`Backend error ${res.status}: ${text}`);
+                        }
+
+                        const data = await res.json();
+                        log(JSON.stringify(data, null, 2));
+                    } catch (e) {
+                        log(`Request failed: ${e.message}`);
+                    }
+                },
+                (err) => {
+                    log(`Could not get location (code ${err.code}): ${err.message}`);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        });
+    </script>
+
 
 </body>
 </html>

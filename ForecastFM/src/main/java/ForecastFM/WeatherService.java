@@ -29,13 +29,29 @@ public class WeatherService{
                 .build();
 
         HttpResponse<String> geoResponse = client.send(geoRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (geoResponse.statusCode() != 200) {
+            return "unknown location";
+        }
         JsonNode geoRoot = mapper.readTree(geoResponse.body());
+
+        if(!geoRoot.isArray()){
+            return "unknown location";
+        }
 
         if (geoRoot.isEmpty()) {
             return "Okänd plats";
         }
 
-        return geoRoot.get(0).get("name").asText();
+        JsonNode first = geoRoot.get(0);
+        JsonNode nameNode = first.get("name");
+
+        if (nameNode == null || nameNode.isNull()) {
+            return "Okänd plats";
+        }
+
+        return nameNode.asText();
+        //return geoRoot.get(0).get("name").asText();
     }
 
     // Ny funktion: Hämta väderdata för lat/lon
