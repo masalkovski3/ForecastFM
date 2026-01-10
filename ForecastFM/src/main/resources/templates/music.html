@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ForecastFM</title>
+    <link href= "style.css"rel="stylesheet" type="text/css">
+</head>
+
+<body id="music-body">
+    <header>
+        <img src="logga.png" alt="ForecastFM logo" height="160px" width="700px">
+    </header>
+
+    <nav>
+        <p>Homepage</p>
+        <p>About us</p>
+        <p>blahblah</p>
+    </nav>
+
+    <main id="music-main">
+        <h2 th:if="${city}" th:text="'Todays weather in ' + ${city}"></h2>
+
+        <p th:if="${weatherMain}"
+        th:text="'Weather: ' + ${weatherMain} + ' (' + ${weatherDescription} + ')'">
+        </p>
+
+        <p th:if="${temperature}"
+        th:text="'Temperature: ' + ${temperature} + ' °C'">
+        </p>
+
+        <h2 th:if="${city}" th:text="'Todays playlist for ' + ${city}"></h2>
+        <ul>
+            <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias recusandae error consequuntur sunt harum perferendis animi aliquam quis? Velit facilis enim commodi, totam nisi eveniet necessitatibus! Ut quidem harum odit!</li>
+            <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquid suscipit, maxime, molestias consectetur maiores sequi esse inventore consequuntur tempore adipisci officiis voluptatibus quas numquam architecto deleniti perferendis nesciunt. Et, soluta?</li>
+        </ul>
+    </main>
+
+</body>
+</html>
