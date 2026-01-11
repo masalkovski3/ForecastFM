@@ -97,6 +97,9 @@
             const ul = document.createElement("ul");
             ul.className = "track-list";
 
+            console.log("tracks =", tracks);
+            console.log("typeof tracks =", typeof tracks, "isArray?", Array.isArray(tracks));
+
             tracks.forEach(t => {
                 const li = document.createElement("li");
                 li.className = "track-item";

@@ -1,13 +1,15 @@
 package ForecastFM;
 
+import java.util.List;
+
 public class MashupResponse {
 
     private final WeatherDto weather;
     private final MoodProfile mood;
-    private final Object tracks;
+    private final List<TrackDto> tracks;
     private final int limit;
 
-    private MashupResponse(WeatherDto weather, MoodProfile mood, Object tracks, int limit) {
+    private MashupResponse(WeatherDto weather, MoodProfile mood, List<TrackDto> tracks, int limit) {
         this.weather = weather;
         this.mood = mood;
         this.tracks = tracks;
@@ -22,7 +24,7 @@ public class MashupResponse {
         return mood;
     }
 
-    public Object getTracks() {
+    public List<TrackDto> getTracks() {
         return tracks;
     }
 
@@ -32,7 +34,7 @@ public class MashupResponse {
 
     public static MashupResponse from(WeatherDto weather,
                                       MoodProfile mood,
-                                      Object tracks, int limit) {
+                                      List<TrackDto> tracks, int limit) {
         return new MashupResponse(weather, mood, tracks, limit);
     }
 }
