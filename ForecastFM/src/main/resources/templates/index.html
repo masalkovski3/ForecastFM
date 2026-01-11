@@ -67,21 +67,23 @@
             }
         });
 
-        function renderSummary(weather, mood) {
+        function renderSummary(weather) {
             const div = document.createElement("div");
             div.className = "summary";
 
+            const city = weather.city || "—";
             const temp = weather.temperature != null ? `${weather.temperature.toFixed(1)}°C` : "—";
             const desc = weather.description || weather.main || "—";
-            const moodId = mood.id || "—";
 
             div.innerHTML = `
     <h2>Result</h2>
-    <p><strong>Weather:</strong> ${desc} (${temp})</p>
-    <p><strong>Mood:</strong> ${moodId}</p>
+    <p><strong>City:</strong> ${escapeHtml(city)}</p>
+    <p><strong>Weather:</strong> ${escapeHtml(desc)} (${escapeHtml(temp)})</p>
   `;
+
             return div;
         }
+
 
         /*
         function renderTracks(tracks) {

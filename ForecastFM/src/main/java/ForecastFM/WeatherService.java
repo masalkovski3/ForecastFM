@@ -89,9 +89,11 @@ public class WeatherService{
     String main = data.get("weather").get(0).get("main").asText();
     String description = data.get("weather").get(0).get("description").asText();
     double temperature = data.get("main").get("temp").asDouble();
+    String city = (data.get("name") != null && !data.get("name").isNull()) ?
+            data.get("name").asText() : "Unknown city";
 
     // Returnera ett WeatherDto-objekt
-    return new WeatherDto(weatherId, main, description, temperature);
+    return new WeatherDto(weatherId, main, description, temperature, city);
     }
 
     public WeatherDto getWeatherForMashup(double lat, double lon) throws Exception {
@@ -106,8 +108,10 @@ public class WeatherService{
         String main = data.get("weather").get(0).get("main").asText();
         String description = data.get("weather").get(0).get("description").asText();
         double temperature = data.get("main").get("temp").asDouble();
+        String city = (data.get("name") != null && !data.get("name").isNull()) ?
+                data.get("name").asText() : "Unknown city";
 
-        return new WeatherDto(weatherId, main, description, temperature);
+        return new WeatherDto(weatherId, main, description, temperature, city);
     }
 }
 
