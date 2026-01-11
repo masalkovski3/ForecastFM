@@ -8,15 +8,15 @@ public class MoodProfile {
     private final List<String> seedGenres;
     private final double valence;
     private final double danceability;
-    private final double tempo;
+    private final double energy;
 
-    public MoodProfile(String id, List<String> keywords, List<String> seedGenres, double valence, double danceability, double tempo) {
+    public MoodProfile(String id, List<String> keywords, List<String> seedGenres, double valence, double danceability, double energy) {
         this.id = id;
         this.keywords = keywords;
         this.seedGenres = seedGenres;
         this.valence = valence;
         this.danceability = danceability;
-        this.tempo = tempo;
+        this.energy = energy;
     }
 
     public String getId() { return id; }
@@ -24,5 +24,5 @@ public class MoodProfile {
     public List<String> getSeedGenres() { return seedGenres; }
     public double getValence() { return valence; }
     public double getDanceability() { return danceability; }
-    public double getTempo() { return tempo; }
+    public double getEnergy() { return energy; }
 }
