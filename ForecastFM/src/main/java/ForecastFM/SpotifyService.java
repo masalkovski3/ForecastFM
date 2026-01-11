@@ -49,6 +49,33 @@ public class SpotifyService {
     }
 
     public List<String> getTracksFromMood(MoodProfile mood) throws IOException, InterruptedException {
+
+        // 1) Hämta kandidater i ETT anrop (limit = 10 totalt)
+        List<String> genreTracks = getTracksFromGenresCombined(mood.getSeedGenres(), 10);
+
+        // 2) Filtrera på mood (som tidigare)
+        List<String> moodTracks = new ArrayList<>();
+        for (String track : genreTracks) {
+            TrackDto trackDto = getTrackByName(track);
+            if (trackDto == null) continue;
+
+            if (moodMatches(mood, trackDto)) {
+                moodTracks.add(track);
+            }
+        }
+
+        // 3) Fallback om filtret blir för strikt
+        if (moodTracks.isEmpty()) {
+            return genreTracks.stream().distinct().limit(10).toList();
+        }
+
+        // 4) Cap totalt 10 (och undvik dubbletter)
+        return moodTracks.stream().distinct().limit(10).toList();
+    }
+
+
+    /*
+    public List<String> getTracksFromMood(MoodProfile mood) throws IOException, InterruptedException {
         List<String> genreTracks = new ArrayList<>();
         for (String genre : mood.getSeedGenres()) {
             List<String> result = getTrackNames(genre);
@@ -78,12 +105,67 @@ public class SpotifyService {
         return moodTracks;
     }
 
+     */
+
+    public List<String> getTracksFromGenresCombined(List<String> genres, int limit)
+            throws IOException, InterruptedException {
+
+        String token = getAccessToken();
+
+        // Ex: "pop dance"
+        String query = String.join(" ", genres) + "music";
+        String q = URLEncoder.encode(query, StandardCharsets.UTF_8);
+
+        String url = "https://api.spotify.com/v1/search"
+                + "?q=" + q
+                + "&type=track"
+                + "&limit=" + limit
+                + "&market=SE";
+
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + token)
+                .header("Accept", "application/json")
+                .header("User-Agent", "ForecastFM/1.0")
+                .GET()
+                .build();
+
+        HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+        if (res.statusCode() != 200) {
+            throw new RuntimeException("Spotify search failed, HTTP " + res.statusCode() + ": " + res.body());
+        }
+
+        JSONObject root = new JSONObject(res.body());
+        JSONArray items = root.getJSONObject("tracks").getJSONArray("items");
+
+        List<String> out = new ArrayList<>();
+        for (int i = 0; i < items.length(); i++) {
+            JSONObject t = items.getJSONObject(i);
+
+            String trackName = t.optString("name", "Unknown track");
+
+            JSONArray artistsArr = t.optJSONArray("artists");
+            String artistName = "Unknown artist";
+            if (artistsArr != null && artistsArr.length() > 0) {
+                artistName = artistsArr.getJSONObject(0).optString("name", artistName);
+            }
+
+            out.add(trackName + " – " + artistName);
+        }
+
+
+        // total cap, och undvik dubbletter om Spotify råkar returnera så
+        return out.stream().distinct().limit(limit).toList();
+    }
+
+
     public String getTracksFromGenre(String genre) throws IOException, InterruptedException {
         String token = getAccessToken();
         String url = "https://api.spotify.com/v1/search"
                 + "?q=" + URLEncoder.encode("genre:" + genre, StandardCharsets.UTF_8)
                 + "&type=track"
-                + "&limit=10"
+                + "&limit=5"
                 + "&market=SE";
 
         HttpRequest request = HttpRequest.newBuilder()
