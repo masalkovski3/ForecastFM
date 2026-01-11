@@ -1,20 +1,26 @@
 package ForecastFM;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.boot.context.properties.PropertyMapper;
+
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS;
+
+@JsonInclude(ALWAYS)
 public class MashupResponse {
 
     private final WeatherDto weather;
     private final MoodProfile mood;
     //private final List<TrackDto> tracks;
-    private final List<String> songs;
+    private final List<String> tracks;
     private final int limit;
 
-    private MashupResponse(WeatherDto weather, MoodProfile mood, List<String> songs, int limit) {
+    private MashupResponse(WeatherDto weather, MoodProfile mood, List<String> tracks, int limit) {
         this.weather = weather;
         this.mood = mood;
         //this.tracks = tracks;
-        this.songs = songs;
+        this.tracks = tracks;
         this.limit = limit;
     }
 
@@ -26,9 +32,9 @@ public class MashupResponse {
         return mood;
     }
 
-//    public List<TrackDto> getTracks() {
-//        return tracks;
-//    }
+    public List<String> getTracks() {
+        return tracks;
+    }
 
     public int getLimit() {
         return limit;
@@ -36,7 +42,8 @@ public class MashupResponse {
 
     public static MashupResponse from(WeatherDto weather,
                                       MoodProfile mood,
-                                      List<String> songs, int limit) {
-        return new MashupResponse(weather, mood, songs, limit);
+                                      List<String> tracks, int limit) {
+
+        return new MashupResponse(weather, mood, tracks, limit);
     }
 }

@@ -48,168 +48,6 @@ public class SpotifyService {
         }
     }
 
-    /**
-     * Hämtar och returnerar alla genrer i API-et
-     * @return lista med genrer.
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    public String getGenres() throws IOException, InterruptedException {
-        String token = getAccessToken();
-
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.spotify.com/v1/recommendations/available-genre-seeds"))
-                .header("Authorization", "Bearer " + accessToken)
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-
-        return response.body();
-    }
-
-    /**
-     * Hämtar en artist baserat på namn.
-     * @param name
-     * @return
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    public String getArtists(String name) throws IOException, InterruptedException {
-        String token = getAccessToken();
-
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.spotify.com/v1/search?q=" + name + "&type=artist&limit=10"))
-                .header("Authorization", "Bearer " + accessToken)
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-        return response.body();
-    }
-
-    /**
-     * Hämtar recommendationer baserat på tempo och valence.
-     *
-     * @param seedGenres
-     * @param tempo
-     * @param valence
-     * @param limit
-     * @return
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    public String getRecommendations(List<String> seedGenres, double tempo, double valence, double danceability, int limit) throws IOException, InterruptedException {
-        String token = getAccessToken();
-
-        String seedGenresParam = String.join(",", seedGenres);
-        if (seedGenresParam.isBlank()) {
-            throw new RuntimeException("No seed genres provided (seedGenres was empty)");
-        }
-
-        String url = "https://api.spotify.com/v1/recommendations"
-                + "?seed_genres=" + seedGenresParam
-                + "&target_tempo=" + tempo
-                + "&target_valence=" + valence
-                + "&target_danceability=" + danceability
-                + "&limit=" + limit
-                + "&market=SE";
-
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Authorization", "Bearer " + token)
-                .header("Accept", "application/json")
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-
-        return response.body();
-    }
-
-    public List<TrackDto> searchTracks(MoodProfile mood, int limit) throws IOException, InterruptedException {
-        String response = getRecommendations(
-                mood.getSeedGenres(),
-                mood.getEnergy(),
-                mood.getValence(),
-                mood.getDanceability(),
-                limit
-        );
-        String trimmed = response == null ? "" : response.trim();
-        if (!trimmed.startsWith("{")) {
-            throw new RuntimeException("Expected JSON object from Spotify, got: " +
-                    trimmed.substring(0, Math.min(300, trimmed.length())));
-        }
-
-        JSONObject root = new JSONObject(trimmed);
-
-        //JSONObject root = new JSONObject(response);
-        JSONArray tracks = root.optJSONArray("tracks");
-        List<TrackDto> result = new ArrayList<>();
-
-        if (tracks == null) {
-            return result;
-        }
-
-        for (int i = 0; i < tracks.length(); i++) {
-            JSONObject t = tracks.getJSONObject(i);
-
-            String name = t.optString("name", "Unknown track");
-
-            // artists: [{name: ...}, ...]
-            JSONArray artistsArr = t.optJSONArray("artists");
-            String artist = "Unknown artist";
-            if (artistsArr != null && artistsArr.length() > 0) {
-                List<String> names = new ArrayList<>();
-                for (int a = 0; a < artistsArr.length(); a++) {
-                    String an = artistsArr.getJSONObject(a).optString("name", "");
-                    if (!an.isBlank()) names.add(an);
-                }
-                if (!names.isEmpty()) {
-                    artist = String.join(", ", names);
-                }
-            }
-
-            String url = "#";
-            JSONObject externalUrls = t.optJSONObject("external_urls");
-            if (externalUrls != null) {
-                url = externalUrls.optString("spotify", "#");
-            }
-
-            // preview_url kan vara null
-            String previewUrl = t.isNull("preview_url") ? null : t.optString("preview_url", null);
-
-            result.add(new TrackDto(name, artist, url, previewUrl, 0, 0, 0));
-        }
-
-        return result;
-    }
-
-    public String testSearch(MoodProfile mood) throws IOException, InterruptedException {
-        String token = getAccessToken();
-
-
-
-        String url = "https://api.spotify.com/v1/search?q=abba&type=track&limit=1&market=SE";
-
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Authorization", "Bearer " + token)
-                .header("Accept", "application/json")
-                .header("User-Agent", "ForecastFM/1.0")   // viktig i vissa edge-miljöer
-                .GET()
-                .build();
-
-        HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println("Spotify search URI: " + res.uri());
-        System.out.println("Spotify search status: " + res.statusCode());
-        System.out.println("Spotify search headers: " + res.headers().map());
-        System.out.println("Spotify search body length: " + (res.body() == null ? "null" : res.body().length()));
-
-        return res.body();
-    }
-
     public List<String> getTracksFromMood(MoodProfile mood) throws IOException, InterruptedException {
         List<String> genreTracks = new ArrayList<>();
         for (String genre : mood.getSeedGenres()) {
@@ -231,6 +69,10 @@ public class SpotifyService {
             if (moodMatches(mood, trackDto)) {
                 moodTracks.add(track);
             }
+        }
+
+        if (moodTracks.isEmpty()) {
+            return genreTracks.stream().distinct().limit(10).toList();
         }
 
         return moodTracks;
@@ -345,7 +187,7 @@ public class SpotifyService {
     }
 
     public boolean moodMatches(MoodProfile mood, TrackDto trackDto) throws IOException, InterruptedException {
-        double tolerance = 0.15;
+        double tolerance = 0.30;
         return Math.abs(trackDto.getValence() - mood.getValence()) <= tolerance &&
                 Math.abs(trackDto.getDanceability() - mood.getDanceability()) <= tolerance &&
                 Math.abs(trackDto.getEnergy() - mood.getEnergy()) <= tolerance;

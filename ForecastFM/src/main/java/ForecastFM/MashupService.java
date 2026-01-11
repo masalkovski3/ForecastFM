@@ -23,8 +23,7 @@ public class MashupService {
             MoodProfile mood = moodMapper.fromWeather(snapshot);
 //            List<TrackDto> tracks = spotifyService.searchTracks(mood, limit);
             List<String> tracks = spotifyService.getTracksFromMood(mood);
-
-
+            if (tracks == null) tracks = List.of();
 
             return MashupResponse.from(weather, mood, tracks, limit);
         }
