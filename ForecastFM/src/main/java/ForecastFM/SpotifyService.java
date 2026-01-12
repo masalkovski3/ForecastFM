@@ -51,7 +51,7 @@ public class SpotifyService {
     public List<String> getTracksFromMood(MoodProfile mood) throws IOException, InterruptedException {
 
         // 1) Hämta kandidater i ETT anrop (limit = 10 totalt)
-        List<String> genreTracks = getTracksFromGenresCombined(mood.getSeedGenres(), 10);
+        List<String> genreTracks = getTracksFromGenresCombined(mood,  10);
 
         // 2) Filtrera på mood (som tidigare)
         List<String> moodTracks = new ArrayList<>();
@@ -107,13 +107,14 @@ public class SpotifyService {
 
      */
 
-    public List<String> getTracksFromGenresCombined(List<String> genres, int limit)
+    public List<String> getTracksFromGenresCombined(MoodProfile mood, int limit)
             throws IOException, InterruptedException {
 
         String token = getAccessToken();
 
         // Ex: "pop dance"
-        String query = String.join(" ", genres) + "music";
+        String query = String.join(" ", mood.getSeedGenres()) +
+                /*String.join(" ", mood.getKeywords()) + */"music";
         String q = URLEncoder.encode(query, StandardCharsets.UTF_8);
 
         String url = "https://api.spotify.com/v1/search"
