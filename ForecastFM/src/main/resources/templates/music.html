@@ -18,21 +18,39 @@
     </nav>
 
     <main id="music-main">
+
         <button id="btnGenerate">Generate Music for Your Weather</button>
-        <div id="status"></div>
+        <div id="status">
+            <div id="loader" class="spinner hidden"></div>
+            <span id="statusText"></span>
+        </div>
+
         <div id="result"></div>
+
     </main>
     <script>
         const btn = document.getElementById("btnGenerate");
-        const statusEl = document.getElementById("status");
+        const statusTextEl = document.getElementById("statusText");
+        const loaderEl = document.getElementById("loader")
         const resultEl = document.getElementById("result");
 
+        function setLoading(isLoading, message = "") {
+            if (isLoading) {
+                loaderEl.classList.remove("hidden");
+                statusTextEl.textContent = message;
+                btn.disabled = true;
+            } else {
+                loaderEl.classList.add("hidden");
+                btn.disabled = false;
+                statusTextEl.textContent = message;
+            }
+        }
+
         btn.addEventListener("click", async () => {
-            statusEl.textContent = "Working…";
+            setLoading(true, "Generating...");
             resultEl.innerHTML = "";
 
             try {
-                //Hämtar geolocation genom webben, ist för genom java
                 const pos = await new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject);
                 });
@@ -40,7 +58,6 @@
                 const lat = pos.coords.latitude;
                 const lon = pos.coords.longitude;
 
-                //kallar på backenden för att fixa mashupsen
                 const res = await fetch(`/api/v1/mashup?lat=${lat}&lon=${lon}`);
                 if (!res.ok) {
                     const text = await res.text();
@@ -52,17 +69,15 @@
                 console.log("Full backend payload:", data);
                 console.log("tracks raw:", data.tracks, "isArray?", Array.isArray(data.tracks));
 
-
-                //renderar summeringen av datan, vädret tracks m.m.
                 const weather = data.weather || {};
                 const mood = data.mood || {};
-                statusEl.textContent = "";
 
+                setLoading(false, ""); // dölj spinner, rensa status
                 resultEl.appendChild(renderSummary(weather, mood));
                 resultEl.appendChild(renderTracks(data.tracks || []));
 
             } catch (err) {
-                statusEl.textContent = `Request failed: ${err.message}`;
+                setLoading(false, `Request failed: ${err.message}`);
             }
         });
 
