@@ -41,7 +41,7 @@
                 const lon = pos.coords.longitude;
 
                 //kallar på backenden för att fixa mashupsen
-                const res = await fetch(`/api/v1/mashups/weather-music?lat=${lat}&lon=${lon}`);
+                const res = await fetch(`/api/v1/mashup?lat=${lat}&lon=${lon}`);
                 if (!res.ok) {
                     const text = await res.text();
                     throw new Error(`Backend error ${res.status}: ${text}`);
@@ -89,119 +89,7 @@
 
             return div;
         }
-
-
-        /*
-        function renderTracks(tracks) {
-            const section = document.createElement("section");
-            section.className = "tracks";
-
-            const title = document.createElement("h3");
-            title.textContent = "Recommended tracks";
-            section.appendChild(title);
-
-            if (tracks.length === 0) {
-                const p = document.createElement("p");
-                p.textContent = "No tracks returned.";
-                section.appendChild(p);
-                return section;
-            }
-
-            const ul = document.createElement("ul");
-            ul.className = "track-list";
-
-            console.log("tracks =", tracks);
-            console.log("typeof tracks =", typeof tracks, "isArray?", Array.isArray(tracks));
-
-            tracks.forEach(t => {
-                const li = document.createElement("li");
-                li.className = "track-item";
-
-                // Om backend skickar List<String>
-                if (typeof t === "string") {
-                    li.textContent = t;            // visar hela strängen
-                    ul.appendChild(li);
-                    return;
-                }
-
-                // Om backend någon gång skickar objekt (framtidssäkert)
-                const name = t.name || "Unknown track";
-                const artist = t.artist || "Unknown artist";
-                const url = t.url || "#";
-                const preview = t.previewUrl;
-
-                li.innerHTML = `
-    <a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(name)}</a>
-    <span> – ${escapeHtml(artist)}</span>
-    ${preview ? ` | <a href="${preview}" target="_blank" rel="noopener noreferrer">Preview</a>` : ""}
-  `;
-                ul.appendChild(li);
-            });
-
-
-            section.appendChild(ul);
-            return section;
-        }
-
-        //XSS-skydd
-        function escapeHtml(str) {
-            return String(str)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
-        }
-        /*
-        const output = document.getElementById("output");
-        const btn = document.getElementById("btnGenerate");
-
-        function log(msg) {
-            output.textContent = msg;
-        }
-
-        btn.addEventListener("click", () => {
-            log("Fetching location...");
-
-            if (!navigator.geolocation) {
-                log("Geolocation is not supported by this browser.");
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                async (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lon = pos.coords.longitude;
-
-                    log(`Got coordinates:\nlat=${lat}\nlon=${lon}\nCalling backend...`);
-
-                    try {
-                        // Din endpoint i MashupController
-                        const url = `/api/v1/mashups/weather-music?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=10`;
-
-                        const res = await fetch(url);
-                        if (!res.ok) {
-                            const text = await res.text();
-                            throw new Error(`Backend error ${res.status}: ${text}`);
-                        }
-
-                        const data = await res.json();
-                        log(JSON.stringify(data, null, 2));
-                    } catch (e) {
-                        log(`Request failed: ${e.message}`);
-                    }
-                },
-                (err) => {
-                    log(`Could not get location (code ${err.code}): ${err.message}`);
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
-        });
-         */
+        
         function escapeHtml(str) {
             return String(str)
                 .replaceAll("&", "&amp;")

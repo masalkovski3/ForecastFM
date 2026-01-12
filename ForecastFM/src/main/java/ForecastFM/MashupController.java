@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/mashups")
+@RequestMapping("/api/v1/mashup")
 public class MashupController {
 
     private MashupService mashupService;
@@ -16,7 +16,7 @@ public class MashupController {
         this.mashupService = mashupService;
     }
 
-    @GetMapping("/weather-music")
+    @GetMapping
     public MashupResponse getWeatherMusic(
             @RequestParam double lat,
             @RequestParam double lon,
