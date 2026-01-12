@@ -282,7 +282,6 @@ public class SpotifyService {
     public TrackDto getTrackById(String trackId) throws IOException, InterruptedException {
         String token = getAccessToken();
 
-        // 1. Hämta track-info
         String trackUrl = "https://api.spotify.com/v1/tracks/" + trackId;
 
         HttpRequest trackRequest = HttpRequest.newBuilder()
@@ -295,7 +294,7 @@ public class SpotifyService {
         HttpResponse<String> trackResponse = httpClient.send(trackRequest, HttpResponse.BodyHandlers.ofString());
 
         if (trackResponse.statusCode() != 200) {
-            return null; // Track finns inte
+            return null;
         }
 
         JSONObject trackJson = new JSONObject(trackResponse.body());
@@ -319,7 +318,6 @@ public class SpotifyService {
                 trackJson.getJSONObject("external_urls").optString("spotify", "#") : "#";
         String previewUrl = trackJson.optString("preview_url", null);
 
-        // 2. Hämta audio-features
         String featuresUrl = "https://api.spotify.com/v1/audio-features/" + trackId;
 
         HttpRequest featuresRequest = HttpRequest.newBuilder()
@@ -332,18 +330,17 @@ public class SpotifyService {
         HttpResponse<String> featuresResponse = httpClient.send(featuresRequest, HttpResponse.BodyHandlers.ofString());
 
         if (featuresResponse.statusCode() != 200) {
-            return null; // Audio-features finns inte
+            return null;
         }
 
         JSONObject featuresJson = new JSONObject(featuresResponse.body());
 
-        // Säker hämtning av valence, danceability, energy
         double valence = featuresJson.optDouble("valence", -1);
         double danceability = featuresJson.optDouble("danceability", -1);
         double energy = featuresJson.optDouble("energy", -1);
 
         if (valence < 0 || danceability < 0 || energy < 0) {
-            return null; // Saknade värden
+            return null;
         }
 
         return new TrackDto(name, artist, urlTrack, previewUrl, valence, danceability, energy);
@@ -354,7 +351,7 @@ public class SpotifyService {
      * Returnerar null om track inte finns.
      */
     public String getTrackNameById(String trackId) throws IOException, InterruptedException {
-        String token = getAccessToken(); // Din metod för access token
+        String token = getAccessToken();
 
         String trackUrl = "https://api.spotify.com/v1/tracks/" + trackId;
 
@@ -368,11 +365,11 @@ public class SpotifyService {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            return null; // Track finns inte
+            return null;
         }
 
         JSONObject trackJson = new JSONObject(response.body());
-        return trackJson.optString("name", null); // Returnerar låtnamn eller null
+        return trackJson.optString("name", null);
     }
 
 }

@@ -21,7 +21,6 @@ public class MashupService {
             WeatherDto weather = weatherService.getWeatherForMashup(lat, lon);
             WeatherSnapshot snapshot = new WeatherSnapshot(weather.getWeatherId());
             MoodProfile mood = moodMapper.fromWeather(snapshot);
-//            List<TrackDto> tracks = spotifyService.searchTracks(mood, limit);
             List<String> tracks = spotifyService.getTracksFromMood(mood);
             if (tracks == null) tracks = List.of();
 
