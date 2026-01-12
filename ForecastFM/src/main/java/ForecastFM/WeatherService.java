@@ -84,16 +84,20 @@ public class WeatherService{
         return null; // eller kasta exception beroende på hur du vill hantera fel
     }
 
+    JsonNode weatherNode = data.get("weather").get(0);
+
     // Extrahera relevant info
     int weatherId = data.get("weather").get(0).get("id").asInt();
     String main = data.get("weather").get(0).get("main").asText();
     String description = data.get("weather").get(0).get("description").asText();
+    String icon = weatherNode.get("icon").asText();
     double temperature = data.get("main").get("temp").asDouble();
     String city = (data.get("name") != null && !data.get("name").isNull()) ?
             data.get("name").asText() : "Unknown city";
 
+
     // Returnera ett WeatherDto-objekt
-    return new WeatherDto(weatherId, main, description, temperature, city);
+    return new WeatherDto(weatherId, main, description, temperature, city, icon);
     }
 
     public WeatherDto getWeatherForMashup(double lat, double lon) throws Exception {
@@ -102,6 +106,7 @@ public class WeatherService{
         if (data == null) {
             return null;
         }
+        JsonNode weatherNode = data.get("weather").get(0);
 
         // Mappa till WeatherDto
         int weatherId = data.get("weather").get(0).get("id").asInt();
@@ -110,8 +115,9 @@ public class WeatherService{
         double temperature = data.get("main").get("temp").asDouble();
         String city = (data.get("name") != null && !data.get("name").isNull()) ?
                 data.get("name").asText() : "Unknown city";
+        String icon = weatherNode.get("icon").asText();
 
-        return new WeatherDto(weatherId, main, description, temperature, city);
+        return new WeatherDto(weatherId, main, description, temperature, city, icon);
     }
 }
 

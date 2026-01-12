@@ -31,6 +31,11 @@ nav{
     border-top: 1px solid rgb(76, 80, 86);
 }
 
+nav a{
+    text-decoration: none;
+    color: antiquewhite;
+}
+
 nav p{
     padding: 20px;
     margin: 0px;
@@ -42,6 +47,10 @@ nav p{
 nav p:hover{
     background-color:rgba(163, 135, 135, 0.3);
     cursor: pointer;
+}
+
+#highlight a{
+    font-weight: 900;
 }
 
 main{
@@ -76,7 +85,8 @@ main h1:hover{
 #music-main{
     display: flex;
     flex-direction: column;
-    background-color: rgb(110, 104, 159);
+    align-items: stretch;
+    background-color: rgba(163, 135, 135, 0.3);
     border-radius: 20px;
     border: 5px solid rgb(49, 40, 59);
     width: 70%;
@@ -104,16 +114,46 @@ main button:hover{
     cursor: pointer;
 }
 
+#result {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    gap: 20px;
+    margin-top: 20px;
+    width: 100%;
+}
+
 #btnGenerate {
     font-size: 20px;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-weight: 600;
 }
 
-.summary, .tracks {
-    max-width: 700px;
-    margin: 24px auto;
+.summary{
+    margin: 10px auto;
     padding: 16px;
+    margin-left: 30px;
+    border-radius: 7px;
+    color: black;
+    font-size: 25px;
+}
+
+.summary h2, .summary h3{
+    font-size: 32px !important;
+    margin: 8px;
+    border-bottom: 2px solid black;
+}
+.tracks{
+    max-width: 700px;
+    margin: 10px auto;
+    padding: 16px;
+    color: black;
+    font-size: 22px;
+}
+
+.tracks h2, .tracks h3{
+    font-size: 32px !important;
+    margin: 8px;
 }
 
 .track-list {
@@ -123,5 +163,14 @@ main button:hover{
 
 .track-item {
     padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
+    margin: 5px;
+    background-color: rgba(251, 246, 246, 0.27);
+    border: 1px double black;
+    border-radius: 3px;
+}
+
+#weather-info{
+    padding: 15px;
+    border-radius: 7px;
+    height: 60%;
 }

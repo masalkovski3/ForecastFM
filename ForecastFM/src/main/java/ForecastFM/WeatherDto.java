@@ -7,14 +7,16 @@ public class WeatherDto {
     private final String description;
     private final double temperature;
     private final String city;
+    private final String icon;
 
     public WeatherDto(int weatherId, String main, String description, double temperature
-        , String city) {
+        , String city, String icon) {
         this.weatherId = weatherId;
         this.main = main;
         this.description = description;
         this.temperature = temperature;
         this.city = city;
+        this.icon = icon;
     }
 
     public String getCity() { return city; }
@@ -33,5 +35,9 @@ public class WeatherDto {
 
     public double getTemperature() {
         return temperature;
+    }
+
+    public String getIcon() {
+        return icon;
     }
 }
