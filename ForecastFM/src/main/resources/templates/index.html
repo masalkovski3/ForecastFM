@@ -14,12 +14,15 @@
     <nav>
         <p id="highlight"><a href="/">Home</a></p>
         <p><a href="/music">Music today</a></p>
-        <p><a href="about_us.html">About us</a></p>
     </nav>
 
     <main>
-        <button id="btnGenerate">Generate from my location</button>
+        <section id="hero">
+            <p id="catchphrase">Let the forecast set the tone</p>
+            <button id="btnGenerate">Generate from my location</button>
+        </section>
     </main>
+
     <script>
         document.getElementById("btnGenerate").addEventListener("click", () => {
             window.location.href = "/music";

@@ -34,6 +34,7 @@ nav{
 nav a{
     text-decoration: none;
     color: antiquewhite;
+    font-weight: 900;
 }
 
 nav p{
@@ -73,6 +74,19 @@ main h1{
 
 main h1:hover{
     cursor: pointer;
+}
+
+#hero {
+    text-align: center;
+    margin-top: 40px;
+}
+
+#catchphrase {
+    font-size: 1.6rem;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: beige;
 }
 
 /* Musik sidan*/
@@ -174,3 +188,4 @@ main button:hover{
     border-radius: 7px;
     height: 60%;
 }
+
