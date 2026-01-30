@@ -18,7 +18,10 @@ public class MashupService {
         }
 
         public MashupResponse createMashup(double lat, double lon, int limit) throws Exception {
-            WeatherDto weather = weatherService.getWeatherForMashup(lat, lon);
+            WeatherDto weather = weatherService.getWeatherWithFallback(lat, lon);
+            if (weather == null) {
+            throw new RuntimeException("Could not fetch weather data");
+            }
             WeatherSnapshot snapshot = new WeatherSnapshot(weather.getWeatherId());
             MoodProfile mood = moodMapper.fromWeather(snapshot);
             List<String> tracks = spotifyService.getTracksFromMood(mood);
