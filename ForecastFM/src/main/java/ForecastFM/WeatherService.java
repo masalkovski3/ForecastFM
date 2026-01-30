@@ -19,7 +19,6 @@ public class WeatherService{
     private static final double DEFAULT_LON = 13.0038;
     private static final String DEFAULT_CITY = "Malmö";
     
-    
     public JsonNode getWeather(double lat, double lon) throws Exception {
         String weatherUrl = "https://api.openweathermap.org/data/2.5/weather"
                 + "?lat=" + lat

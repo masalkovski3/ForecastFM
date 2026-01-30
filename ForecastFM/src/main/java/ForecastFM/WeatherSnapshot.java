@@ -10,7 +10,7 @@ public class WeatherSnapshot {
     public int getWeatherId() { return weatherId; }
 
     public int getGroup() {
-        return weatherId / 100; // 2,3,5,6,7,8
+        return weatherId / 100;
     }
 
     public boolean isClear() {
